@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: Wallet Service API
+  version: "1.0.0"
+  description:
+    REST API для управления балансом кошельков.
+    Позволяет пополнять или снимать средства, а также получать текущий баланс кошелька.
+
+components:
+  schemas:
+    WalletOperationRequest:
+      type: object
+      required:
+        - walletId
+        - operationType
+        - amount
+      properties:
+        walletId:
+          type: string
+          format: uuid
+          description: UUID кошелька
+        operationType:
+          type: string
+          enum: [DEPOSIT, WITHDRAW]
+          description: Тип операции (пополнение или снятие)
+        amount:
+          type: number
+          format: float
+          minimum: 0
+          description: Сумма операции
+
+    WalletBalanceResponse:
+      type: object
+      required:
+        - walletId
+        - balance
+      properties:
+        walletId:
+          type: string
+          format: uuid
+          description: UUID кошелька
+        balance:
+          type: number
+          format: float
+          description: Текущий баланс кошелька
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: HTTP-код ошибки
+          example: 400
+        message:
+          type: string
+          description: Описание ошибки
+          example: "invalid request parameters"
+
+  responses:
+    BadRequest:
+      description: Неверные данные запроса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 400
+            message: "invalid operation type or amount"
+
+    NotFound:
+      description: Кошелёк не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 404
+            message: "wallet not found"
+
+    InternalServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            message: "internal server error"
+
+
+paths:
+  /api/v1/wallet:
+    post:
+      summary: Изменить баланс кошелька
+      description: >
+        Выполняет операцию пополнения (`DEPOSIT`) или снятия (`WITHDRAW`)
+        средств с указанного кошелька.  
+        Возвращает обновлённый баланс.
+      operationId: updateWalletBalance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletOperationRequest'
+            example:
+              walletId: "123e4567-e89b-12d3-a456-426614174000"
+              operationType: "DEPOSIT"
+              amount: 1000
+      responses:
+        '204':
+          description: Баланс успешно обновлён
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/wallets/{walletId}:
+    get:
+      summary: Получить баланс кошелька
+      description: Возвращает текущий баланс кошелька по его UUID.
+      operationId: getWalletBalance
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          description: UUID кошелька
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Баланс найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletBalanceResponse'
+              example:
+                walletId: "123e4567-e89b-12d3-a456-426614174000"
+                balance: 5000
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
