@@ -5,11 +5,12 @@ codegen:
 	go generate ./...
 
 run-dev:
-	set -a; source $(CURDIR)/config/dev.env; set +a; \
+	sed -i 's/^DATABASE_ADDRESS=.*/DATABASE_ADDRESS=postgres:5432/' $(CURDIR)/config.env
+	set -a; source $(CURDIR)/config.env; set +a; \
 	docker-compose up
 
 run-postgres:
-	@set -e; \
-	set -a; source $(CURDIR)/config/local.env; set +a; \
-	cp $(CURDIR)/config/local.env $(CURDIR)/.env; \
+	sed -i 's/^DATABASE_ADDRESS=.*/DATABASE_ADDRESS=localhost:5432/' $(CURDIR)/config.env
+	set -a; source $(CURDIR)/config.env; set +a; \
 	docker-compose up postgres
+
