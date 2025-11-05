@@ -24,8 +24,8 @@ components:
           enum: [DEPOSIT, WITHDRAW]
           description: Тип операции (пополнение или снятие)
         amount:
-          type: number
-          format: float
+          type: integer
+          format: int64
           minimum: 0
           description: Сумма операции
 
@@ -34,15 +34,21 @@ components:
       required:
         - walletId
         - balance
+        - updatedAt
+        - createdAt
       properties:
         walletId:
           type: string
           format: uuid
-          description: UUID кошелька
         balance:
-          type: number
-          format: float
-          description: Текущий баланс кошелька
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     ErrorResponse:
       type: object
@@ -80,6 +86,16 @@ components:
             code: 404
             message: "wallet not found"
 
+    TooManyRequests:
+      description: Превышено количество запросов
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            message: "too many requests"
+
     InternalServerError:
       description: Внутренняя ошибка сервера
       content:
@@ -111,12 +127,17 @@ paths:
               operationType: "DEPOSIT"
               amount: 1000
       responses:
-        '204':
-          description: Баланс успешно обновлён
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletBalanceResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -135,17 +156,15 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Баланс найден
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletBalanceResponse'
-              example:
-                walletId: "123e4567-e89b-12d3-a456-426614174000"
-                balance: 5000
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/InternalServerError'
