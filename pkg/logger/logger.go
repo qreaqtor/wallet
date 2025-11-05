@@ -35,15 +35,15 @@ func (l logger) Debug(ctx context.Context, msg string, args ...any) {
 }
 
 func (l logger) Error(ctx context.Context, msg string, args ...any) {
-	l.log.DebugContext(ctx, msg, args...)
+	l.log.ErrorContext(ctx, msg, args...)
 }
 
 func (l logger) Info(ctx context.Context, msg string, args ...any) {
-	l.log.DebugContext(ctx, msg, args...)
+	l.log.InfoContext(ctx, msg, args...)
 }
 
 func (l logger) Warn(ctx context.Context, msg string, args ...any) {
-	l.log.DebugContext(ctx, msg, args...)
+	l.log.WarnContext(ctx, msg, args...)
 }
 
 func (l logger) WithFields(args ...any) Log {
