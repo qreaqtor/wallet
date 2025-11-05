@@ -6,7 +6,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 FROM alpine:latest
 COPY --from=builder /service/bin/service /service
-COPY --from=builder /service/config/dev.env /.env
+COPY --from=builder /service/config.env /config.env
 
 EXPOSE 8080
 ENTRYPOINT ["/service"]

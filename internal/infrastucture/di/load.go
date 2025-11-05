@@ -14,7 +14,7 @@ func LoadConfig() (config.Config, error) {
 		return config.Config{}, nil
 	}
 
-	cfgPath := ".env"
+	cfgPath := "config.env"
 
 	if strings.Contains(cur, "ac_tests") {
 		cfgPath = strings.Split(cur, "ac_tests")[0] + cfgPath
