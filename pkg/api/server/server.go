@@ -8,17 +8,16 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/qreaqtor/wallet/pkg/api"
 )
 
 type apiServer struct {
 	router *mux.Router
 	addr   string
 
-	log api.Log
+	log Log
 }
 
-func New(log api.Log, port int64) *apiServer {
+func New(log Log, port int64) *apiServer {
 	return &apiServer{
 		router: mux.NewRouter().PathPrefix("/api").Subrouter(),
 		addr:   fmt.Sprintf(":%d", port),
@@ -34,7 +33,7 @@ func (s *apiServer) Run(ctx context.Context) error {
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowedMethods([]string{"GET", "POST"}),
-		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
 		handlers.AllowCredentials(),
 	)(s.router)
 

@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -9,17 +10,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type (
-	Request[In any] interface {
-		GetQuery() query
-		GetPath() path
-		GetBody() (In, error)
-	}
-
-	request[In any] struct {
-		req *http.Request
-	}
-)
+type request[In any] struct {
+	req *http.Request
+}
 
 func New[In any](r *http.Request) Request[In] {
 	return &request[In]{
@@ -48,13 +41,13 @@ func (r request[In]) GetBody() (In, error) {
 	return in, nil
 }
 
-func (r request[In]) GetPath() path {
+func (r request[In]) GetPath() Params {
 	return path{
 		data: mux.Vars(r.req),
 	}
 }
 
-func (r request[In]) GetQuery() query {
+func (r request[In]) GetQuery() Params {
 	return query{
 		data: r.req.URL.Query(),
 	}
@@ -64,15 +57,26 @@ type path struct {
 	data map[string]string
 }
 
-func (p path) Get(key string) (string, bool) {
+func (p path) Get(key string) (string, error) {
 	v, ok := p.data[key]
-	return v, ok
+
+	if !ok {
+		return "", fmt.Errorf("path param not found: %s", key)
+	}
+
+	return v, nil
 }
 
 type query struct {
 	data url.Values
 }
 
-func (q query) Get(key string) string {
-	return q.data.Get(key)
+func (q query) Get(key string) (string, error) {
+	v := q.data.Get(key)
+
+	if v == "" {
+		return "", fmt.Errorf("empty query param: %s", key)
+	}
+
+	return v, nil
 }
