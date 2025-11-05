@@ -13,7 +13,7 @@ DATABASE_ADDRESS=
 
 ## Запуск
 
-Запуск бд в контейнере и перезапись `DATABASE_ADDRESS=postgres:5432`
+Перезапись `DATABASE_ADDRESS=postgres:5432` и запуск в docker-compose
 
 ```
 make run-dev
